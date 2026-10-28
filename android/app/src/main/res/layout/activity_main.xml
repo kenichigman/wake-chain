@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wake Chain"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wakes your PC when the requester asks — only on home WiFi."
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/statusView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="stopped"
+            android:background="#E8E8E8"
+            android:padding="10dp"
+            android:layout_marginBottom="12dp" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Bearer token (the requester uses this to trigger wakes)" android:textStyle="bold" />
+        <TextView android:id="@+id/tokenView"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="—"
+            android:textIsSelectable="true"
+            android:background="#E8E8E8"
+            android:padding="10dp"
+            android:layout_marginBottom="4dp" />
+        <LinearLayout android:orientation="horizontal"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp">
+            <Button android:id="@+id/copyTokenBtn"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Copy token" />
+            <Button android:id="@+id/regenTokenBtn"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Regenerate" />
+        </LinearLayout>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="PC MAC address" android:textStyle="bold" />
+        <EditText android:id="@+id/macField"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Six hex octets, colon-separated"
+            android:inputType="text" android:layout_marginBottom="8dp" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Home WiFi SSID" android:textStyle="bold" />
+        <EditText android:id="@+id/ssidField"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="" android:hint="Your home WiFi name"
+            android:inputType="text" />
+        <Button android:id="@+id/useCurrentBtn"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Use current network" android:layout_marginBottom="8dp" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Listen port" android:textStyle="bold" />
+        <EditText android:id="@+id/portField"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="8765"
+            android:inputType="number" android:layout_marginBottom="12dp" />
+
+        <Button android:id="@+id/startBtn"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Start service" android:layout_marginBottom="8dp" />
+
+        <Button android:id="@+id/stopBtn"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Stop service" android:layout_marginBottom="8dp" />
+
+        <Button android:id="@+id/wakeNowBtn"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Wake now (manual test)" android:layout_marginBottom="8dp" />
+
+        <Button android:id="@+id/batteryBtn"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Exempt from battery optimization"
+            android:layout_marginBottom="8dp" />
+
+    </LinearLayout>
+</ScrollView>
