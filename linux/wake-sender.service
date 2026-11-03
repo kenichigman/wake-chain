@@ -1,0 +1,22 @@
+[Unit]
+Description=Wake sender (Linux) — Wake-on-LAN for a sleeping workstation, mesh-VPN only
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=<sender-user>
+WorkingDirectory=/opt/wake-sender
+Environment=WAKE_BIND=<sender-mesh-ip>
+Environment=WAKE_PORT=8765
+Environment=WAKE_TOKEN_FILE=/opt/wake-sender/token
+Environment=WAKE_TARGET_MAC=<target-mac>
+Environment=WAKE_TARGET_TS_IP=<target-mesh-ip>
+Environment=WAKE_TARGET_LAN_IP=<target-lan-ip>
+Environment=WAKE_BROADCAST=<lan-broadcast>
+ExecStart=/usr/bin/python3 /opt/wake-sender/wake_service.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

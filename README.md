@@ -1,6 +1,6 @@
 # wake-chain
 
-A remote-wake system for a workstation that sleeps: a phone app fires
+A remote-wake system for a workstation that sleeps: an always-on home laptop (originally a phone app) fires
 Wake-on-LAN on authenticated request, and an activity-aware power layer
 on both sides decides — conservatively, and out loud — when waking is
 allowed and when sleeping is safe.
@@ -50,6 +50,56 @@ wake_lease.sh         │    (tailnet only)         │  ├─ SSID gate
   reference-counted lease manager, the sleep decider, and a
   coordinator that arranges dated wake requests in advance as on-box
   scheduled tasks.
+
+## The Linux sender (the current primary path)
+
+The phone design above is where the system started. In production the
+primary sender is now a small service on an always-on laptop that lives
+at home (`linux/`): ~130 lines of Python, standard library only, run
+under systemd. The phone app remains in this repo as the original
+design, and as a fallback that shares the same protocol.
+
+The sender changed; the protocol deliberately did not. `GET /status`
+and `POST /wake`, bearer-token auth with a constant-time compare, the
+same response shapes — the requester scripts never noticed the swap.
+
+Why a laptop replaced the phone as primary: the phone leaves with its
+owner, which is precisely when remote wake matters. The away-hold
+poller described below exists to protect a running machine during
+exactly that gap. The laptop doesn't travel. It is home when nobody
+is, so the wake path is up when it is needed, and the away-hold is a
+safety net instead of a load-bearing wall.
+
+What differs from the phone sender, and why:
+
+- **No SSID gate.** The gate answers "is the sender physically home?"
+  The laptop's answer is deployment, not measurement: it is wired into
+  the home LAN and stays there. A gate that cannot change state is
+  ceremony, so there isn't one.
+- **The awake check is the target's SSH port.** The workstation's LAN
+  side is firewalled — ICMP and TCP from the LAN silently drop, so a
+  ping reports a live machine as dead. The check tries the target's
+  mesh-VPN address, then its LAN address, and treats an answering SSH
+  port as awake. It is the signal that survives the firewall posture,
+  chosen because the obvious one lies.
+- **A wake is verified, not hoped.** `POST /wake` fires the magic
+  packet (limited broadcast and subnet broadcast, ports 9 and 7, up to
+  three rounds), then polls the awake check for up to 150 seconds. It
+  answers `200` only when the target is verified up, and `504` when it
+  is not — a failed wake is reported as failed, in the response, where
+  the requester can act on it.
+- **The token lives in a file** (mode `600`) beside the service, read
+  on every request. It is not in the code, not in the systemd unit,
+  and not in this repo.
+- **It binds only to its mesh-VPN address,** and at startup it waits —
+  indefinitely, checking every few seconds — until that address exists
+  rather than binding anything else. A boot that races the mesh client
+  fails closed.
+
+Configuration is by environment variables (`WAKE_BIND`,
+`WAKE_TARGET_MAC`, `WAKE_TARGET_TS_IP`, `WAKE_TARGET_LAN_IP`,
+`WAKE_TOKEN_FILE`, …), documented in the service source and the unit
+template. Nothing site-specific is hardcoded.
 
 ## The refusal rules (the design core)
 
@@ -102,7 +152,10 @@ asleep when the phone leaves.
 ## Layout
 
 ```
-android/     the phone app (Kotlin, no third-party dependencies)
+linux/       the sender that runs in production: wake_service.py (the
+             service), wake-sender.service (systemd unit template),
+             wake-client.sh (status/wake client for either sender)
+android/     the phone app (Kotlin, no third-party dependencies) (Kotlin, no third-party dependencies)
 host/        PowerShell on the workstation: idle_probe_loop.ps1 (resident
              probe), idle_probe.ps1 (one-shot variant), idle_check.ps1
              (SSH-side reader), wake_check.ps1 (overnight wake check)
